@@ -10,7 +10,6 @@ import seedu.duke.exception.IllegalCommandException;
 
 import java.util.Scanner;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Ui {
     public static final Scanner IN = new Scanner(System.in);
@@ -21,13 +20,10 @@ public class Ui {
     private static Parser userCommandReader;
     public static DifficultyLevel difficultyLevel = DifficultyLevel.EASY;
 
-    private static final Logger logger = Logger.getLogger("Foo");
-
     /**
      * Reads user input and stores it
      */
     public static void beginListening() {
-        logger.log(Level.INFO, "going to start processing user input");
         userInput = IN.nextLine();
     }
 
@@ -42,13 +38,11 @@ public class Ui {
             userCommandReader = new Parser(userInput);
         } catch (IllegalCommandException e) {
             Formatter.printErrorWrongCommand();
-            logger.log(Level.WARNING, "wrong command error");
             throw new ProcessInputException();
         } catch (ArgumentMismatchException e1) {
             int userArgumentCount = e1.userArgumentCount;
             int correctArgumentCount = SyntaxAnalyser.getArgumentCount(e1.userCommandName);
             Formatter.printErrorArgumentsMismatch(e1.userCommandName, userArgumentCount, correctArgumentCount);
-            logger.log(Level.WARNING, "wrong user input format error");
             throw new ProcessInputException();
         } catch (BadTokenException e2) {
             Formatter.printErrorBadTokens();
@@ -76,8 +70,12 @@ public class Ui {
             case BYE:
                 CommandList.executeBye();
                 return;
+            case HELP:
+                CommandList.executeHelpAtStart();
+                return;
             default:
                 Formatter.printErrorUnknown();
+                return;
             }
         }
 
@@ -92,21 +90,24 @@ public class Ui {
             case BYE:
                 CommandList.executeBye();
                 return;
+            case HELP:
+                CommandList.executeHelpAfterMatch();
+                return;
             default:
                 Formatter.printErrorUnknown();
+                return;
             }
         }
 
-        if (MatchStat.getIsPlayerTurn() && selectedCommand == CommandList.SAVE) {
+        if (MatchStat.getIsPlayerShootTurn() && selectedCommand == CommandList.SAVE) {
             Formatter.printErrorUnknown();
             return;
         }
 
-        if (!MatchStat.getIsPlayerTurn() && selectedCommand == CommandList.SHOOT) {
+        if (!MatchStat.getIsPlayerShootTurn() && selectedCommand == CommandList.SHOOT) {
             Formatter.printErrorUnknown();
             return;
         }
-        //@@author
 
         switch (selectedCommand) {
         case BYE:
@@ -136,6 +137,9 @@ public class Ui {
             break;
         case SAVE:
             CommandList.executeSave(readArgumentTokens);
+            break;
+        case HELP:
+            CommandList.executeHelpDuringGame();
             break;
         case CUSTOMIZATION:
             PlayerList.playerList.get(curPlayer).displayCustomizationMenu();

@@ -7,7 +7,7 @@ import seedu.duke.ui.Ui;
 
 public enum CommandList {
 
-    BYE, SHOOT, PENALTY, YES, NO, UPGRADE, EASY, MEDIUM, HARD, SAVE, HEAD, TAIL, CUSTOMIZATION;
+    BYE, SHOOT, PENALTY, YES, NO, UPGRADE, EASY, MEDIUM, HARD, SAVE, HEAD, TAIL, HELP, CUSTOMIZATION;
 
     //insert new user command name here
     ;
@@ -45,6 +45,7 @@ public enum CommandList {
         boolean isScoreGoal = goalCheck(adjustedAiDirection, adjustedDirection, adjustedRange);
 
         MatchStat.updateStat(isScoreGoal);
+        PlayerList.playerList.get(Ui.curPlayer).calculatePerformanceCoins(isScoreGoal);
         PlayerList.playerList.get(Ui.curPlayer).printGoalAfterShoot(isScoreGoal, Math.round(adjustedDirection));
     }
 
@@ -106,6 +107,7 @@ public enum CommandList {
         int upgradeLevelIndex = Integer.parseInt(upgradeLevel);
         SaverList.saverList.get(Ui.curSaver).upgradePower(upgradeLevelIndex);
         SaverList.saverList.get(Ui.curSaver).printSelfInfo();
+        System.out.printf("Your power level has been upgraded to %s%n", level[0]);
     }
 
     //@@author ymirmeddeb
@@ -122,10 +124,34 @@ public enum CommandList {
         float adjustedAiDirection = SaverList.saverList.get(Ui.curSaver).aiDirectionAdjust(Ai.getAiDirection());
         float adjustedRange = SaverList.saverList.get(Ui.curSaver).rangeAdjust();
         testForSave(adjustedSaveDirection, adjustedAiDirection, adjustedRange);
-        boolean isSaveSuccessful = saveCheck(adjustedSaveDirection, adjustedAiDirection, adjustedRange);
-        MatchStat.updateStat(isSaveSuccessful);
-        SaverList.saverList.get(Ui.curSaver).printGoalAfterSave(isSaveSuccessful, Math.round(adjustedSaveDirection));
+        boolean isScoreGoal = goalCheck(adjustedSaveDirection, adjustedAiDirection, adjustedRange);
+        MatchStat.updateStat(isScoreGoal);
+        PlayerList.playerList.get(Ui.curPlayer).calculatePerformanceCoins(isScoreGoal);
+        SaverList.saverList.get(Ui.curSaver).printGoalAfterSave(!isScoreGoal, Math.round(adjustedSaveDirection));
     }
 
+    //@@author ymirmeddeb
+    /**
+     * Prints the commands available after a match is over
+     */
+    public static void executeHelpAfterMatch() {
+        Formatter.printHelpAfterMatch();
+    }
+
+    //@@author ymirmeddeb
+    /**
+     * Prints the commands available when you first start the game
+     */
+    public static void executeHelpAtStart() {
+        Formatter.printHelpAtStart();
+    }
+
+    //@@author ymirmeddeb
+    /**
+     * Prints the commands available during the game
+     */
+    public static void executeHelpDuringGame() {
+        Formatter.printHelpDuringGame();
+    }
 }
 
