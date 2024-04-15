@@ -1,40 +1,10 @@
 # Developer Guide
 
-## Acknowledgements
-
-{list here sources of all reused/adapted ideas, code, documentation, and third-party libraries -- include links to the original source as well}
-
 ## Class Structure
 
-## Product scope
-### Target user profile
-
-{Describe the target user profile}
-
-### Value proposition
-
-{Describe the value proposition: what problem does it solve?}
-
-## User Stories
-
-|Version| As a ... | I want to ... | So that I can ...|
-|--------|----------|---------------|------------------|
-|v1.0|new user|see usage instructions|refer to them when I forget how to use the application|
-|v2.0|user|find a to-do item by name|locate a to-do without having to go through the entire list|
-
-## Non-Functional Requirements
-
-{Give non-functional requirements}
-
-## Glossary
-
-* *glossary item* - Definition
-
-## Instructions for manual testing
-
-{Give instructions on how to do a manual product testing e.g., how to load sample data to be used for testing}
 
 
+# Design of various features
 ## Real penalty shootout setting
 
 
@@ -57,10 +27,11 @@ additional rounds of one kick each are used until one team scores and the other 
 ### Design
 
 
-The procedure is facilitated by `MatchStat`. It records current round number, match number, player score, Ai score, 
-whether it's the player's turn to shoot, whether the match ends, and whether the player wins. 
+The procedure is facilitated by `MatchStat` class. It records current round number, match number, player score, Ai 
+score, whether it's the player's turn to shoot, whether the match ends, whether the player wins, and whether the match 
+is a new match (has not started shooting).
 
-The `updateStat(boolean isPlayer, boolean isGoal)` method converts the outcomes of player's commands into player score 
+The `updateStat(boolean isGoal)` method converts the outcomes of player's commands into player score 
 and Ai score after `penalty` or `save` commands. 
 
 The `decideMatchEnd()` method decides whether a match ends based on the rules mentioned above. 
@@ -84,25 +55,67 @@ example, `shoot 1` is entered by the player.
 How the `MatchStat` class works:
 1. After parsing of the input, `executeShoot("1")` in the `CommandList` class is called.
 
-2. Then `getAiDirection()` in the `Ai` class is called. It returns `direction` of type `int`, which represents the 
+2. Then `getAiDirection()` in the `Ai` class is called. It returns `aiDir` of type `int`, which represents the 
 direction at which Ai wants to save the penalty.
 
-3. After that, `CommandList` has a self invocation to call its `goalCheck(1, direction)` method. This method decides 
-whether the shoot scores or not, and returns `isScoreGoal` of type `boolean`.
+3. Then methods 2, 6 and 8 will adjust the shoot direction and AI direction based on random numbers generated. They try 
+to add randomness into the game.
 
-4. `isScoreGoal` is then passed to the `updateStat(isScoreGoal)` method in the `MatchStat` class. The method changes 
-`playerScore` and `aiScore` (both stored in the same class) based on `isScoreGoal` read and `isPlayerTurn` stored in the
-same class. `MatchStat` then has a self invocation to call its `decideMatchEnd()` method.
+4. After that, `CommandList` has a self invocation to call its 
+`goalCheck(adjustedAiDirection, adjustedDirection, adjustedRange)` method. This method decides whether the shoot scores 
+or not, and returns `isScoreGoal` of type `boolean`.
 
-5. `decideMatchEnd()` method reads `roundCount`, `playerScore` and `aiScore` in the same class, and decides whether a 
-match ends based on the two rules mentioned above. It then changes `isMatchEnd` and `isPlayerWin` in the same class 
+5. `isScoreGoal` is then passed to the `updateStat(isScoreGoal)` method in the `MatchStat` class. The method changes 
+`playerScore` and `aiScore` (both stored in `MatchStat` class) based on `isScoreGoal` read and inverts 
+`isPlayerShootTurn` stored in `MatchStat` class to show now it's AI's turn to shoot. `MatchStat` then has a self 
+invocation to call its `decideMatchEnd()` method.
+
+6. `decideMatchEnd()` method reads `roundCount`, `playerScore` and `aiScore` in `MatchStat` class, and decides whether a 
+match ends based on the two rules mentioned above. It then changes `isMatchEnd` and `isPlayerWin` in `MatchStat` class 
 accordingly.
 
-6. After step 5, all the stats that need to be changed after `shoot` command have been updated. Hence, 
+7. After step 5, all the stats that need to be changed after `shoot` command have been updated. Hence, 
 `updateStat(isScoreGoal)` method returns. However, messages need to be printed out for the player to see that his 
-command finishes executing. Thus, the `printGoalAfterShot(isScoreGoal)` method in the `Formatter` class is called. It 
-prints out all the necessary messages for the user.
+command finishes executing. Thus, the `printGoalAfterShot(isScoreGoal, adjustedDirection)` method in the `Player` class 
+is called. It prints out all the necessary messages for the user.
 
+
+## Coin Toss
+
+### Overview
+
+Coin tosses are used to decide which team shoots first in the penalty shoot out. If the player guesses the coin toss 
+correctly, he can shoot first. If not, AI shoots first. We included a coin toss feature in the game.
+
+### Design
+
+Here’s a class diagram of the `CoinToss` component:
+
+![CoinTossClassDiagram.png](diagrams%2FCoinTossClassDiagram.png)
+
+There are two classes `CoinToss`, `Coin` and one enumeration `CoinResult`. We define an enumeration type called 
+`CoinResult` to ensure that variables of type `CoinResult` will never be assigned an invalid value. The `CoinToss` class
+is responsible for executing coin tosses. The `Coin` class represents a coin used in the coin toss. It has a result, and
+can be tossed. Note that there is no association between `CoinToss` and `Coin`, because `CoinToss` does not store an 
+attribute of the `Coin` class. `CoinToss` only has a dependency on `Coin`, because there is only a transient interaction
+in the `executeCoinToss(guess: CoinResult)` method.
+
+The sequence diagram below illustrates the interactions within the `CoinToss` component. For this example, `head` is 
+guessed by the player.
+
+![CoinTossSequential.png](diagrams%2FCoinTossSequential.png)
+
+How the `CoinToss` component works:
+1. After parsing of the input, `executeCoinToss(HEAD)` in the `CoinToss` class is called.
+2. Then a `coin` object of type `Coin` is created.
+3. In the constructor of Coin, `tossACoin()` method is executed, which assigns the `result` attribute of `coin` a value.
+This result represents the result of the coin toss.
+4. The `coin` object is created and returned to the `CoinToss` class. Then `getResult()` method of the `coin` object is 
+called. `coinResult` is returned to the `CoinToss` class.
+5. Then the `CoinToss` class calls `displayResult(coinResult)` to show player the result of the coin toss.
+6. The `CoinToss` class also calls `processGuessResult(guess, coinResult)` to decide whether the guess is correct. This 
+method also displays the correctness of the guess and updates the stats in MatchStat class accordingly.
+7. Finally, `executeCoinToss(HEAD)` returns.
 
 ## AI Class 
 
@@ -168,55 +181,48 @@ The constructor initializes the `minDirection` and `maxDirection` based on the `
 
 An alternative design could be to have separate classes for different difficulty levels, each with its own implementation of the `getAiDirection()` method. However, this would lead to code duplication and make the codebase more difficult to maintain.
 
-## Player Class
+## Player Class Overview
 
-### Introduction
+### Design
 
-The `Player` class utilizes Object-Oriented Programming principles to track and store a user's performance, implementing functionality that varies based on the player's skill level. As the foundation of our player management system, it encapsulates common attributes and behaviors essential for all player types.
+The `Player` class is a class designed to implementing shoot function and storing user parameters that influence game performance. This class encapsulates essential player attributes which are vital throughout the game:
+
+- `name`: String - The name of the player.
+- `matchCount`: int - Counts the number of matches played.
+- `power`: int - Indicates the player's power level, affecting the accuracy of shots.
+- `skill`: int - Determines the range of directional choices available to the player during gameplay.
 
 ### Skill Level Subclasses
 
-Subclasses `BeginnerSkill`, `MediumSkill`, and `ExpertSkill` are derived from the `Player` base class, each tailored to represent different skill levels. These subclasses override specific methods to provide behaviors unique to each skill level, ensuring a dynamic and engaging gameplay experience.
+The game features several subclasses derived from the `Player` class, each representing different skill levels: `BeginnerSkillPlayer`, `MediumSkillPlayer`, and `ExpertSkillPlayer`. These subclasses provide specialized behaviors through method overriding, tailored to each skill level for a dynamic and engaging gameplay experience.
 
-### Attributes
+### Implementation Details
 
-- `name`: String - Identifies the player.
-- `matchCount`: int - Tracks the number of matches played.
-- `power`: int - Represents the player's power level.
-- `skill`: int - Indicates the player's skill level.
+The `Player` class uses Object-Oriented Programming (OOP) principles, particularly polymorphism and encapsulation, to manage player attributes and behaviors dynamically. An `ArrayList<Player>` is utilized to manage collections of these player instances effectively.
 
-### Methods
+- **Example Scenario**:
+   - When a user starts the game, a `BeginnerSkillPlayer` named "Bruno" is instantiated.
+   - All actions taken by the player, such as completing matches or adjusting power settings, trigger updates within the `Player` class.
+   - The `Player` class interacts with the `PlayerList` to manage and update player data collectively.
 
-- `printSelfInfo()`: Displays the player's basic information.
-- `printGoalBeforeShoot()`: Prepares the player for a shooting attempt.
-- `printGoalBeforeSave()`: Prepares the player for a saving attempt.
-- `printGoalAfterShoot(boolean goalScored, int direction)`: Shows the outcome of a shooting attempt.
-- `upgradePower(int level)`: Enhances the player's power based on the specified level.
-- `shootDirectionAdjust(int dir)`: Modifies the shooting direction for the player.
-- `shootDirectionFormula(int left, int right, int dir, int power)`: Computes the shooting direction.
-- `aiDirectionAdjust(int aiDir)`: Modifies the AI's direction to offer a challenge.
-- `rangeAdjust()`: Modifies the shooting range according to the game's difficulty.
+This structure is designed to leverage the flexibility of OOP to adapt player functionalities based on game interactions dynamically.
+
+### Methods and Their Roles
+
+Each method in the `Player` class is designed to perform specific roles that enhance the interactivity and responsiveness of the game environment:
+
+- `printSelfInfo()`: Displays the player's basic information, including name, match count, power, and skill.
+- `printGoalBeforeShoot()`: Prepares the player for a shooting attempt, visualized through an on-screen graph.
+- `printGoalBeforeSave()`: Prepares the player for a saving attempt, supported by graphical feedback.
+- `printGoalAfterShoot(boolean goalScored, int direction)`: Outputs the result of a shooting attempt, enhancing player feedback.
+- `upgradePower(int level)`: Allows players to set their power level, influencing shot effectiveness.
+- `shootDirectionAdjust(int dir)`: Alters shooting direction based on the player's current power level.
+- `shootDirectionFormula(int left, int right, int dir, int power)`: Calculates the optimal shooting direction using provided parameters.
+- `aiDirectionAdjust(int aiDir)`: Adjusts AI behavior based on the player's skill level, ensuring suitable challenge levels.
+- `rangeAdjust()`: Modifies the shooting range to match the game's set difficulty levels.
 
   ![UML Class Diagram](diagrams%2Fplayer.png)
 
-```java
-public class MediumSkill extends Player {
-    @Override
-    public void printGoalBeforeShoot() {
-        Formatter.printGoalBeforeShotforMedium();
-    }
-
-    @Override
-    public void printGoalBeforeSave() {
-        Formatter.printGoalBeforeSaveForMedium();
-    }
-
-    @Override
-    public void printGoalAfterShoot(boolean goalScored, int direction) {
-        Formatter.printGoalAfterShotMedium(goalScored, direction);
-    }
-}
-```
 ## PlayerList Class
 
 ### Attributes
@@ -229,15 +235,15 @@ public class MediumSkill extends Player {
 
 ### Utilizing ArrayList
 
-The `PlayerList` class showcases the strategic use of `ArrayList<Player>` for player management, chosen for its dynamic resizing capabilities and efficient access times. This choice aligns with our need to manage a variable number of player objects dynamically.
+ArrayList<Player> stores and manages player objects, allowing for efficient access and modification, which is essential for real-time gameplay updates.
 
 ### Leveraging Polymorphism
 
 Polymorphism is integral to our game, allowing us to abstract player actions in the `Player` class and provide specific implementations in its subclasses. This design pattern simplifies codebase maintenance and enhances gameplay by introducing dynamic behavior based on the player's skill level.
 
-#### ExecuteShoot Method
+#### Implementation: ExecuteShoot Method
 
-The `executeShoot` method exemplifies polymorphism in action, adjusting player behavior during shooting based on their skill level.
+The `executeShoot` method from CommandList Class exemplifies polymorphism in action, adjusting player behavior during shooting based on player's skill level.
 
 ```java
 public static void executeShoot(String[] readArgumentTokens) {
@@ -248,18 +254,18 @@ public static void executeShoot(String[] readArgumentTokens) {
   PlayerList.l1.get(Ui.curPlayer).printGoalAfterShoot(isScoreGoal, Math.round(adjustedDirection));
 }
 ```
-### Skill Upgrade Mechanism
+#### Implementation: Skill Upgrade Mechanism
 
 The `skillUpgrade` method in the `PlayerList` class is a key feature, allowing players to improve their skills based on game performance. The method checks the player's current skill and match count, upgrading their skill level if certain conditions are met.
 he mechanism operates through a structured process, enhancing the gaming experience by offering a realistic approach to skill progression:
 
-1. **Skill Level Assessment**: The system evaluates a player's current skill level alongside their performance metrics, such as match count and success rate.
+1. **Skill Level Assessment**: Evaluates a player's current skill level and performance metrics, like match count and success rate.
 
-2. **Determination of Skill Upgrade Eligibility**: Utilizing predefined criteria, the system determines if a player qualifies for a skill upgrade. These criteria may include metrics like a minimum number of matches played or specific performance thresholds.
+2. **Determination of Skill Upgrade Eligibility**: Responsible to assess if a player qualifies for a skill upgrade, based on their game performance.
 
-3. **Application of Skill Upgrade**: Eligible players will have their skill attribute adjusted to a higher level. This upgrade might unlock new abilities, enhance stats, or offer other in-game advantages.
+3. **Application of Skill Upgrade**: Adjusts the player's skill attribute to a higher level if they meet the necessary criteria and enhancing their gameplay capabilities.
 
-4. **Feedback to the User**: The system informs the user of the successful skill upgrade through UI messages or other feedback mechanisms, providing immediate recognition of their achievement.
+4. **Feedback to the User**: Provides in-game notifications or UI messages to inform the player of their upgraded skills
 
 ![UML Class Diagram](diagrams%2FupdateSkill.png)
 
@@ -351,60 +357,11 @@ The `convertToShootDirection()` method first tries to parse the input string int
 
 An alternative implementation could be to have separate methods for handling different types of input validation, such as checking if the input is a valid integer and checking if the input is within the valid range. This would make the code more modular and easier to maintain.
 
-## Save Class
+## Saver and SaverList Class
 
 ### Overview
 
-The `Save` class handles the save command in the game. It prompts the user to enter the direction to save the penalty and checks if the user's input is valid. It then compares the user's input with the AI's direction and determines whether a goal is saved or not.
-
-### Design
-
-The `Save` class has the following components:
-
-1. An `executeSave()` method that prompts the user for a direction, gets the AI's penalty kick direction, and then checks if the save is successful.
-2. A `getUserSaveDirection()` method that reads the user's input and returns a corresponding integer value after validation.
-3. Integration with the `ShootDirectionConverter` class to validate the user's input and ensure it's within the expected range.
-
-### Implementation
-
-Here is the implementation structure of the `Save` class:
-
-```java
-public class Save {
-    
-  public static void executeSave() {
-    int userSaveDirection = getUserSaveDirection();
-    int aiPenaltyDirection = Ai.getAiDirection();
-    boolean isGoalSaved = userSaveDirection == aiPenaltyDirection;
-
-
-    Formatter.printSaveResult(isGoalSaved);
-    Ui.roundCount++;
-  }
-  
-  private static int getUserSaveDirection() {
-    int userDirection;
-    do {
-      System.out.print("Enter the direction to save the penalty (0, 1, or 2): ");
-      String directionString = Ui.IN.nextLine().trim();
-      userDirection = ShootDirectionConverter.convertToShootDirection(directionString);
-      if (userDirection == -1) {
-        System.out.println("Invalid direction! Please enter 0, 1, or 2.");
-      }
-    } while (userDirection == -1);
-    return userDirection;
-  }
-  
-}
-```
-
-The `executeSave()` method drives the process, starting by invoking `getUserSaveDirection()` to prompt the user for input. It then retrieves the AI's direction with `Ai.getAiDirection()`. A comparison is made, and the result of the attempted save is passed to the `Formatter` for output. The `roundCount` is incremented at the end of the method, signaling the progression of the game.
-
-The `getUserSaveDirection()` method repeatedly prompts the user for input until a valid direction (0, 1, or 2) is entered. Input validation is offloaded to `ShootDirectionConverter.convertToShootDirection()`, which translates the string input into a numeric direction or returns -1 for invalid input.
-
-### Alternatives Considered
-
-The current implementation could be further modularized by separating input collection and input validation into distinct methods. This would potentially improve the readability and maintainability of the code by delineating clear responsibilities within the class structure. Additionally, using exceptions to handle invalid input could provide a cleaner mechanism for managing input errors and reduce the reliance on sentinel values like `-1`.
+The `Saver` and `Saverlist` class is implemented in the same way the `Player` and `PlayerList` class is.
 
 ## DifficultyLevel Enum
 
@@ -487,6 +444,68 @@ An alternative to using an enum could be to use integer constants or string cons
 ```
 
 The `Ai` class depends on the `DifficultyLevel` enum to determine the range of directions for the AI. The `Penalty` class uses the `Ai` class to get the AI's direction and compares it with the user's input direction. The `CommandList` class provides the `goalCheck()` method to determine if a goal is scored based on the user's and AI's directions. The `Formatter` class is responsible for printing the goal result and error messages related to wrong argument types. The `Ui` class provides the user's input direction to the `Penalty` class.
+
+
+## Product scope
+### Target user profile
+
+Designed for football fans seeking a straightforward alternative to complex, high-spec "AAA" games like FIFA or PES. Ideal for those who prefer simplicity and quick gameplay over detailed simulation.
+
+### Value proposition
+
+NUSFC 24 offers football enthusiasts a refreshing break from the complexities of 3D games like FIFA or eFootball. Dive into the core thrill of football with our focus on the art of penalty shooting and goalkeeping, celebrating the pure joy and challenge of the game's decisive moments.
+
+## User Stories
+
+| Version | As a ... | I want to ...                        | So that I can ...                           |
+|---------|----------|--------------------------------------|---------------------------------------------|
+| v1.0    | user     | see the goal                         | know where to shoot my penalty              |
+| v1.0    | user     | add shoot command                    | choose the penalty direction like real game |
+| v1.0    | user     | have an ai goalkeeper                | know whether my penalty is saved            |
+| v2.0    | user     | level my player up                   | try different functions in the game         |
+| v2.0    | user     | have a real penalty shootout setting | experience a more realistic game            |
+| v2.0    | user     | toss a coin before each match        | see which team should shoot first           |
+| v2.0    | user     | select difficulty mode               | keep refining my skills                     |
+
+
+## Non-Functional Requirements
+
+1. Should work on any *mainstream OS* as long as it has Java `11` or above installed.
+2. Should allow the player to play as long as he wants without a noticeable sluggishness in performance for typical 
+usage.
+
+## Glossary
+
+* Mainstream OS: Windows, Linux, Unix, macOS
+
+## Instructions for manual testing
+
+### Launch and shutdown
+1. Initial launch
+   1. Download the jar file and copy into an empty folder
+   2. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar tp.jar` command to run
+      the application.
+2. Use `bye` to exit the game
+
+### Coin Toss
+1. Prerequisites: You are at the beginning of a match.
+2. Test case: `head` or `tail`
+
+   Expected: A coin is tossed, and its result is shown. If the coin is not `UPRIGHT`, you are told whether you guess it
+right, and you can start the game properly.
+3. Test case: `bye`
+
+    Expected: You will exit the program.
+4. Test case: Other invalid commands like `shoot 0`, `save 0`, `...`
+
+   Expected: An error message is shown, and you are asked to guess the coin result again.
+
+### Match Ending Criteria
+1. Prerequisites: You finished guessing the coin toss, and are in a match.
+2. You need to enter alternating commands `shoot int` and `save int` to progress the match.
+3. Try to make the scores to satisfy the two penalty shoot out rules (Best-of-five Kicks and Sudden Death).
+
+   Expected: The match ends, showing whether you have won or lost.
 
 ## Future Enhancements
 

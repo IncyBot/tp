@@ -12,10 +12,6 @@ public class BeginnerSkillPlayer extends Player {
         super(name, matchCount);
     }
 
-    public BeginnerSkillPlayer(String name, int matchCount, int power) {
-        super(name, matchCount, power);
-    }
-
     @Override
     public void printSelfInfo() {
         super.printSelfInfo();
@@ -23,15 +19,16 @@ public class BeginnerSkillPlayer extends Player {
 
     @Override
     protected void printPower(){
+        int powerLevelTotal = 3;
         System.out.print("Power:");
-        for (int i=0; i<3;i++){
-            if (i<power){
+        for (int i = 0; i < powerLevelTotal; i++){
+            if (i < power){
                 System.out.print(" ###");
             }else{
                 System.out.print("    ");
             }
         }
-        if (power==1){
+        if (power == 1){
             System.out.println(" Level-Beginner");
         }else if (power == 2){
             System.out.println(" Level-Medium");
@@ -42,9 +39,10 @@ public class BeginnerSkillPlayer extends Player {
 
     @Override
     protected void printSkill(){
+        int skillLevelTotal = 3;
         System.out.print("Skill:");
-        for (int i=0; i<3;i++){
-            if (i<skill){
+        for (int i = 0; i < skillLevelTotal; i++){
+            if (i < skill){
                 System.out.print(" ###");
             }else{
                 System.out.print("    ");
@@ -64,11 +62,6 @@ public class BeginnerSkillPlayer extends Player {
     }
 
     @Override
-    public void printGoalBeforeSave() {
-        Formatter.printGoalBeforeSaveForBeginner();
-    }
-
-    @Override
     public void printGoalAfterShoot(boolean goalScored, int direction) {
         Formatter.printGoalAfterShotBeginner(goalScored, direction);
     }
@@ -81,13 +74,19 @@ public class BeginnerSkillPlayer extends Player {
 
     @Override
     public float shootDirectionAdjust(int dir){
-        if (dir>2){
-            System.out.println("Oops! Remember, beginners start with directions 0, 1, and 2. But keep playing to unlock more kicks!");
-            System.out.println("Practice makes perfect. Let's aim for those goals together!");
-            dir = dir%3;
+        int beginnerMinShoot = 0;
+        int beginnerMaxShoot = 2;
+        if (dir> beginnerMaxShoot){
+            System.out.println("----------WARNING----------");
+            System.out.println("Oops! Remember, beginners can only start with directions 0, 1, and 2. ");
+            System.out.println("You failed to shoot on target.");
+            System.out.println("Practice makes perfect. Keep playing to unlock more kicks!");
+            System.out.println("---------------------------");
+            int missTargetVariable = -1;
+            return this.shootDirectionFormula(missTargetVariable, missTargetVariable, missTargetVariable,this.power);
         }
-        int left=(dir-1==0)?0:dir-1;
-        int right=(dir+1==2)?2:dir+1;
+        int left= Math.max(dir - 1, beginnerMinShoot);
+        int right= Math.min(dir + 1, beginnerMaxShoot);
         return this.shootDirectionFormula(left,right,dir,this.power);
     }
 
@@ -103,20 +102,21 @@ public class BeginnerSkillPlayer extends Player {
 
     @Override
     public float rangeAdjust() {
-        float range=0;
+        float range;
         switch (Ui.difficultyLevel){
         case EASY:
-            range = (float)0.1;
+            range = (float)EASY_GK_COVERED_RANGE;
             break;
         case MEDIUM:
-            range = (float)0.2;
+            range = (float)MEDIUM_GK_COVERED_RANGE;
             break;
         case HARD:
-            range = (float)0.5;
+            range = (float)HARD_GK_COVERED_RANGE;
             break;
         default:
-            range =0;
+            return 0;
         }
         return range;
     }
 }
+//@@author

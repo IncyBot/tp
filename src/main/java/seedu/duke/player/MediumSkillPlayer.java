@@ -2,13 +2,12 @@ package seedu.duke.player;
 
 import seedu.duke.Formatter;
 import seedu.duke.ui.Ui;
-import java.util.Random;
 
 //@@author HenryGan138
 
 public class MediumSkillPlayer extends Player {
     private final int skill = 2;
-    Random rand = new Random();
+    public static final double DIRECTIONINDEX_ADJUST_FOR_MEDIUM = 2.5;
     public MediumSkillPlayer(String name, int matchCount) {
         super(name, matchCount);
     }
@@ -24,15 +23,16 @@ public class MediumSkillPlayer extends Player {
 
     @Override
     protected void printPower() {
+        int powerLevelTotal = 3;
         System.out.print("Power:");
-        for (int i=0; i<3;i++){
-            if (i<power){
+        for (int i = 0; i < powerLevelTotal; i++){
+            if (i < power){
                 System.out.print(" ###");
             }else{
                 System.out.print("    ");
             }
         }
-        if (power==1){
+        if (power == 1){
             System.out.println(" Level-Beginner");
         }else if (power == 2){
             System.out.println(" Level-Medium");
@@ -48,9 +48,10 @@ public class MediumSkillPlayer extends Player {
 
     @Override
     protected void printSkill(){
+        int skillLevelTotal = 3;
         System.out.print("Skill:");
-        for (int i=0; i<3;i++){
-            if (i<skill){
+        for (int i = 0; i < skillLevelTotal; i++){
+            if (i < skill){
                 System.out.print(" ###");
             }else{
                 System.out.print("    ");
@@ -65,29 +66,30 @@ public class MediumSkillPlayer extends Player {
     }
 
     @Override
-    public void printGoalBeforeSave() {
-        Formatter.printGoalBeforeSaveForMedium();
-    }
-
-    @Override
     public void printGoalAfterShoot(boolean goalScored, int direction) {
         Formatter.printGoalAfterShotMedium(goalScored, direction);
     }
     @Override
     public void upgradePower(int level) {
         assert level>=0&&level<=2;
-        this.power=level+1;
+        this.power = level + 1;
     }
 
     @Override
     public float shootDirectionAdjust(int dir){
-        if (dir>5){
-            System.out.println("Oops! Remember, beginners start with directions 0, 1, and 2. But keep playing to unlock more kicks!");
-            System.out.println("Practice makes perfect. Let's aim for those goals together!");
-            dir = dir%6;
+        int mediumMinShoot = 0;
+        int mediumMaxShoot = 5;
+        if (dir > mediumMaxShoot){
+            System.out.println("----------WARNING----------");
+            System.out.println("Oops! Remember, medium player can only shoot with direction between 0 to 5.");
+            System.out.println("You failed to shoot on target.");
+            System.out.println("Practice makes perfect. Keep playing to unlock more kicks!\"");
+            System.out.println("---------------------------");
+            int missTargetIndex = -1;
+            return this.shootDirectionFormula(missTargetIndex, missTargetIndex, missTargetIndex,this.power);
         }
-        int left=(dir-1==0)?0:dir-1;
-        int right=(dir+1==5)?5:dir+1;
+        int left= Math.max(dir - 1, mediumMinShoot);
+        int right= Math.min(dir + 1, mediumMaxShoot);
         return this.shootDirectionFormula(left,right,dir,this.power);
     }
 
@@ -98,25 +100,26 @@ public class MediumSkillPlayer extends Player {
 
     @Override
     public float aiDirectionAdjust(int aiDir) {
-        return (float) (2.5*aiDir);
+        return (float) (DIRECTIONINDEX_ADJUST_FOR_MEDIUM * aiDir);
     }
 
     @Override
     public float rangeAdjust() {
-        float range=0;
+        float range;
         switch (Ui.difficultyLevel){
         case EASY:
-            range = (float)0.25;
+            range = (float)(DIRECTIONINDEX_ADJUST_FOR_MEDIUM *EASY_GK_COVERED_RANGE);
             break;
         case MEDIUM:
-            range = (float)0.5;
+            range = (float)(DIRECTIONINDEX_ADJUST_FOR_MEDIUM *MEDIUM_GK_COVERED_RANGE);
             break;
         case HARD:
-            range = (float)1.25;
+            range = (float)(DIRECTIONINDEX_ADJUST_FOR_MEDIUM *HARD_GK_COVERED_RANGE);;
             break;
         default:
-            range =0;
+            return 0;
         }
         return range;
     }
 }
+//@@author

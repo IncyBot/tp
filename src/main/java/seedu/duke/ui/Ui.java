@@ -1,6 +1,12 @@
 package seedu.duke.ui;
 
-import seedu.duke.*;
+import seedu.duke.cointoss.CoinResult;
+import seedu.duke.cointoss.CoinToss;
+import seedu.duke.CommandList;
+import seedu.duke.DifficultyLevel;
+import seedu.duke.Formatter;
+import seedu.duke.Parser;
+import seedu.duke.SyntaxAnalyser;
 import seedu.duke.stats.MatchStat;
 import seedu.duke.stats.PlayerList;
 import seedu.duke.exception.ProcessInputException;
@@ -9,7 +15,6 @@ import seedu.duke.exception.BadTokenException;
 import seedu.duke.exception.IllegalCommandException;
 
 import java.util.Scanner;
-import java.util.logging.Level;
 
 public class Ui {
     public static final Scanner IN = new Scanner(System.in);
@@ -60,43 +65,13 @@ public class Ui {
 
         //@@author runxinghuan
         if (MatchStat.getIsNewMatch()) {
-            switch (selectedCommand) {
-            case HEAD:
-                CoinToss.executeCoinToss(CoinToss.HEAD);
-                return;
-            case TAIL:
-                CoinToss.executeCoinToss(CoinToss.TAIL);
-                return;
-            case BYE:
-                CommandList.executeBye();
-                return;
-            case HELP:
-                CommandList.executeHelpAtStart();
-                return;
-            default:
-                Formatter.printErrorUnknown();
-                return;
-            }
+            executeBeforeMatch(selectedCommand);
+            return;
         }
 
         if (MatchStat.getIsMatchEnd()) {
-            switch (selectedCommand) {
-            case YES:
-                MatchStat.updateForNewMatch();
-                return;
-            case NO:
-                CommandList.executeBye();
-                return;
-            case BYE:
-                CommandList.executeBye();
-                return;
-            case HELP:
-                CommandList.executeHelpAfterMatch();
-                return;
-            default:
-                Formatter.printErrorUnknown();
-                return;
-            }
+            executeAfterMatch(selectedCommand);
+            return;
         }
 
         if (MatchStat.getIsPlayerShootTurn() && selectedCommand == CommandList.SAVE) {
@@ -108,7 +83,15 @@ public class Ui {
             Formatter.printErrorUnknown();
             return;
         }
+        //@@author hwc0419
 
+        executeMainMatch(selectedCommand, readArgumentTokens);
+    }
+
+    /**
+     * Executes the command in a match.
+     */
+    private static void executeMainMatch(CommandList selectedCommand, String[] readArgumentTokens) {
         switch (selectedCommand) {
         case BYE:
             CommandList.executeBye();
@@ -131,8 +114,8 @@ public class Ui {
             difficultyLevel = DifficultyLevel.HARD;
             System.out.println("Difficulty level set to HARD");
             break;
-        case UPGRADE:
-            CommandList.executeUpgrade(readArgumentTokens);
+        case SETPOWER:
+            CommandList.executeSetPower(readArgumentTokens);
             CommandList.executeSaverUpgrade(readArgumentTokens);
             break;
         case SAVE:
@@ -156,5 +139,57 @@ public class Ui {
 
     public static boolean getIsRunning() {
         return isRunning;
+    }
+
+    //@@author runxinghuan
+
+    /**
+     * Executes the command when a match ends.
+     */
+    private static void executeAfterMatch(CommandList selectedCommand) {
+        switch (selectedCommand) {
+        case YES:
+            MatchStat.updateForNewMatch();
+            break;
+        case NO:
+            CommandList.executeBye();
+            break;
+        case BYE:
+            CommandList.executeBye();
+            break;
+        case HELP:
+            CommandList.executeHelpAfterMatch();
+            break;
+        case CUSTOMIZATION:
+            PlayerList.playerList.get(curPlayer).displayCustomizationMenu();
+            return;
+        default:
+            Formatter.printErrorUnknown();
+        }
+    }
+
+    /**
+     * Executes the command before a match starts.
+     */
+    private static void executeBeforeMatch(CommandList selectedCommand) {
+        switch (selectedCommand) {
+        case HEAD:
+            CoinToss.executeCoinToss(CoinResult.HEAD);
+            break;
+        case TAIL:
+            CoinToss.executeCoinToss(CoinResult.TAIL);
+            break;
+        case BYE:
+            CommandList.executeBye();
+            break;
+        case HELP:
+            CommandList.executeHelpAtStart();
+            break;
+        case CUSTOMIZATION:
+            PlayerList.playerList.get(curPlayer).displayCustomizationMenu();
+            return;
+        default:
+            Formatter.printErrorUnknown();
+        }
     }
 }

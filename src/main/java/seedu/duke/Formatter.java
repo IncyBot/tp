@@ -2,6 +2,9 @@ package seedu.duke;
 
 import seedu.duke.stats.MatchStat;
 
+import java.util.Objects;
+
+//@@author hwc0419
 public class Formatter {
 
     /**
@@ -39,6 +42,7 @@ public class Formatter {
         printWrapper("-");
     }
 
+    //@@author
     /**
      * Method to check if the shot resulted in a goal
      * If shoot direction matches save direction, it's not a goal and the returned value is false.
@@ -55,7 +59,7 @@ public class Formatter {
         System.out.println("|    0    |    1    |    2    |");
         System.out.println("|         |         |         |");
         System.out.println("|         |         |         |");
-        System.out.println("\nSelect direction to shoot : [0-2]");
+        System.out.println("\nSelect direction to shoot : ");
     }
 
     public static void printGoalBeforeShotforMedium() {
@@ -69,7 +73,7 @@ public class Formatter {
         System.out.println("|         |         |         |");
         System.out.println("|    3    |    4    |    5    |");
         System.out.println("|         |         |         |");
-        System.out.println("\nSelect direction to shoot : [0-5]");
+        System.out.println("\nSelect direction to shoot : ");
     }
 
     public static void printGoalBeforeShotforExpert() {
@@ -82,7 +86,7 @@ public class Formatter {
         System.out.println("|    3    |    4    |    5    |");
         System.out.println("|---------|---------|---------|");
         System.out.println("|    6    |    7    |    8    |");
-        System.out.println("\nSelect direction to shoot : [0-8]");
+        System.out.println("\nSelect direction to shoot : ");
     }
 
     public static void printGoalAfterShotBeginner(boolean goalScored, int direction) {
@@ -331,12 +335,11 @@ public class Formatter {
         showScore();
     }
 
+    //@@author runxinghuan
     private static void showScore() {
         System.out.println("Your score: " + MatchStat.getPlayerScore());
         System.out.println("Opponent's score: " + MatchStat.getAiScore());
     }
-
-    //@@author runxinghuan
 
     /**
      * Prints the result after a match ends.
@@ -704,7 +707,7 @@ public class Formatter {
         System.out.println("    If it says 'Select direction to save :'");
         System.out.println("        save[direction] - Choose a direction to save.");
         printWrapper("-");
-        System.out.println("    upgrade[power level] - Upgrade the power level of your player.");
+        System.out.println("    setpower [power level] - Set the power level of your player.");
         System.out.println("        0 - Low power level.");
         System.out.println("        1 - Medium power level.");
         System.out.println("        2 - High power level.");
@@ -792,6 +795,12 @@ public class Formatter {
         default:
             rankingSuffix = "th";
             break;
+        }
+
+        if ((Objects.equals(commandName, "SHOOT"))||(Objects.equals(commandName, "save"))){
+            regex="integer between 0 to 8";
+        }else if (Objects.equals(commandName, "SETPOWER")){
+            regex="integer betwen 0 to 2";
         }
         System.out.printf("\t SyntaxAnalyser: %s expects the %d%s argument to be %s\n",
                 commandName, userRanking, rankingSuffix, regex);

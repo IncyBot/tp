@@ -7,6 +7,7 @@ import seedu.duke.ui.Ui;
 
 public class ExpertSkillPlayer extends Player {
     private final int skill = 3;
+    public static final int DIRECTIONINDEX_ADJUST_FOR_EXPERT = 4;
 
     public ExpertSkillPlayer(String name, int matchCount) {
         super(name, matchCount);
@@ -22,15 +23,16 @@ public class ExpertSkillPlayer extends Player {
 
     @Override
     protected void printPower() {
+        int powerLevelTotal = 3;
         System.out.print("Power:");
-        for (int i=0; i<3;i++){
-            if (i<power){
+        for (int i = 0; i < powerLevelTotal; i++){
+            if (i < power){
                 System.out.print(" ###");
             }else{
                 System.out.print("    ");
             }
         }
-        if (power==1){
+        if (power == 1){
             System.out.println(" Level-Beginner");
         }else if (power == 2){
             System.out.println(" Level-Medium");
@@ -41,9 +43,10 @@ public class ExpertSkillPlayer extends Player {
 
     @Override
     protected void printSkill(){
+        int skillLevelTotal = 3;
         System.out.print("Skill:");
-        for (int i=0; i<3;i++){
-            if (i<skill){
+        for (int i = 0; i < skillLevelTotal; i++){
+            if (i < skill){
                 System.out.print(" ###");
             }else{
                 System.out.print("    ");
@@ -65,11 +68,6 @@ public class ExpertSkillPlayer extends Player {
     }
 
     @Override
-    public void printGoalBeforeSave() {
-        Formatter.printGoalBeforeSaveForExpert();
-    }
-
-    @Override
     public void printGoalAfterShoot(boolean goalScored, int direction) {
         Formatter.printGoalAfterShotExpert(goalScored, direction);
     }
@@ -82,8 +80,10 @@ public class ExpertSkillPlayer extends Player {
 
     @Override
     public float shootDirectionAdjust(int dir){
-        int left=(dir-1==0)?0:dir-1;
-        int right=(dir+1==8)?8:dir+1;
+        int expertMinShoot = 0;
+        int expertMaxShoot = 8;
+        int left= Math.max(dir - 1, expertMinShoot);
+        int right= Math.max(dir + 1, expertMaxShoot);
         return this.shootDirectionFormula(left,right,dir,this.power);
     }
 
@@ -94,25 +94,26 @@ public class ExpertSkillPlayer extends Player {
 
     @Override
     public float aiDirectionAdjust(int aiDir) {
-        return (float) (4*aiDir);
+        return (float) (DIRECTIONINDEX_ADJUST_FOR_EXPERT *aiDir);
     }
 
     @Override
     public float rangeAdjust() {
-        float range=0;
+        float range;
         switch (Ui.difficultyLevel){
         case EASY:
-            range = (float)0.4;
+            range = (float)(DIRECTIONINDEX_ADJUST_FOR_EXPERT*EASY_GK_COVERED_RANGE);
             break;
         case MEDIUM:
-            range = (float)0.8;
+            range = (float)(DIRECTIONINDEX_ADJUST_FOR_EXPERT*MEDIUM_GK_COVERED_RANGE);
             break;
         case HARD:
-            range = (float)2;
+            range = (float)(DIRECTIONINDEX_ADJUST_FOR_EXPERT*HARD_GK_COVERED_RANGE);
             break;
         default:
-            range =0;
+            return 0;
         }
         return range;
     }
 }
+//@@author
