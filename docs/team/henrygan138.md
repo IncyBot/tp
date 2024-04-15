@@ -15,13 +15,13 @@ NUSFC 24 is an association football-themed game app. It is played via a Command 
     - Designs structure and implements functions through the parent `Player` class, and its inheritance for `BeginnerSkillPlayer`, `MediumSkillPlayer`, and `ExpertSkillPlayer`.
     - Develops the upgrade mechanism so that create differentiated user experiences.
 - **Highlights**:
-  - Utilizes Object-Oriented Programming and ArrayLists to manage dynamic data, offers a fundamental skeleton structure for NUSFC's other implementations
-  - This feature improves the project development by providing a scalable and polymorphic approach to player management, and offering an interface for team's adding functions
+  - Utilize Object-Oriented Programming and ArrayLists to manage dynamic data, offers a fundamental skeleton structure for NUSFC's other implementations.
+  - This feature improves the project development by providing a scalable and polymorphic approach to player management, and offering an interface for team's adding functions.
 
 #### New Feature: Shoot
 - **What it does**:
   - Allows users to control the player and execute shooting actions via command line inputs.
-  - Design player's attributes power and skills that impact the shooting mechanics through diverse shooting direction and different shooting quality
+  - Designs player's attributes power and skill level which impact shooting mechanics through diverse shooting direction and different shooting quality.
   - Integrates with the `AIGoalKeeper` and `Difficulty` functions to simulate varied gameplay challenges.
 - **Highlights**:
   - This feature is essential for creating a realistic gameplay experience. It allows the game to simulate a true penalty shootout scenario, where user choices and player attributes affect each shot's outcome.
@@ -34,9 +34,9 @@ NUSFC 24 is an association football-themed game app. It is played via a Command 
 
 ### Documentation
 #### User Guide
-- Detailed how users can control the shooter, demonstrating the role of player attributes in gameplay and how these parameters will affect shooting quality.
+- Detailed how users can control the shooter player, demonstrating the role of player attributes in gameplay and how these parameters will affect shooting quality.
 - Explained the player upgrade process, aiding users in gameplay planning.
-- Refine the content in `shoot` command.
+- Refined the content in `shoot` command.
 
 #### Developer Guide
 - Added explanations on the design logic and implementation details for `Player` and `PlayerList`, and demonstrate how these two classes interact to support game functions. 
@@ -45,8 +45,7 @@ NUSFC 24 is an association football-themed game app. It is played via a Command 
 - Helped draft the Product Scope and compiled User Stories
 
 ### Project Management
-- Manage the version 2.0 release on GitHub, including integrate members' code into a united program and deliver JAR file
-- Actively participated in coding for all versions
-- Compiled User Stories to guide the development process and clarify the target functionalities.
-- Helped maintain the issue tracker by assigning issues
-- Reported and fixed bugs and related issues for the team in the PE Dry Run
+- Manage the version 2.0 release on GitHub, including integrate members' code into a united program and deliver JAR file.
+- Actively participated in coding for all versions and maintain issue tracker.
+- Compiled User Stories to guide the development process and clarify the target functions.
+- Reported and fixed bugs and related issues for the team in the PE Dry Run.
